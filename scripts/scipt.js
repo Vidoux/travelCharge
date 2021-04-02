@@ -9,19 +9,59 @@ let markers = new OpenLayers.Layer.Markers( "Markers" );
 map.addLayer(markers);
 
 const keyOpenChargeMap = "&key=256012ac-f9ca-4458-8ecb-4d6a4ffe4396";
-const keyMapQuest = "iMcPufi0mxc3vJi811ipjnFAzG0An65h"
+const keyMapQuest = "iMcPufi0mxc3vJi811ipjnFAzG0An65h";
 
-//Requête pour récupérer 9000 points de charge max en France uniquement
-let resURL = "https://api.openchargemap.io/v3/poi/?output=json&countrycode=FR&maxresults=5000&compact=true&verbose=false" + keyOpenChargeMap;
+function callOCM(contryCode, nbPoints = 100){
+	let reqhttp = 'https://api.openchargemap.io/v3/poi/?output=json&countrycode='+ contryCode + '&maxresults=' + nbPoints + '&compact=true&verbose=false' + keyOpenChargeMap;
+	console.log(reqhttp);
+	let response = fetch(reqhttp).then(res => res.json()).then(function(data){
+			return data;
+		}).catch(error => console.log(error));
+	return response;
+}
 
-fetch(resURL)
-.then(res => res.json())
-.then(data => data.forEach( function(element, index) {
 
-	markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude)
-	})
-	)
-.catch(error => console.log(error));
+
+//TODO supprimer
+// function placerChargeurs(chargeursList){
+// 	console.log(chargeursList);
+// 	chargeursList.forEach( function(element, index) {
+// 		markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude);
+// 	});
+// }
+
+callOCM('FR',9000).then(function(chargeursList){
+	console.log(chargeursList);
+	chargeursList.forEach( function(element, index) {
+		markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude);
+	});
+});
+
+// let myPromise = new Promise(function(myResolve, myReject) {
+//   setTimeout(function() { myResolve("I love You !!"); }, 3000);
+
+// });
+
+// myPromise.then(function(value) {
+//   document.getElementById("demo").innerHTML = value;
+// });
+
+
+
+
+// //Requête pour récupérer 9000 points de charge max en France uniquement
+// let resURL = "https://api.openchargemap.io/v3/poi/?output=json&countrycode=FR&maxresults=10&compact=true&verbose=false" + keyOpenChargeMap;
+
+// fetch(resURL)
+// .then(res => res.json())
+// .then(data => data.forEach( function(element, index) {
+
+// 	markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude)
+// 	})
+// 	)
+// .catch(error => console.log(error));
+
+
 
 let resURL2 = "https://maps.open-street.com/api/route/?origin=48.856614,2.3522219&destination=45.764043,4.835659&mode=driving" + keyOpenChargeMap;
 fetch(resURL2)
@@ -41,7 +81,6 @@ function traceRoute(id){
 	.then(res => res.json())
 	.then(data => console.log(data))
 	.catch(error => console.log(error));
-
 }
 
 
