@@ -2,6 +2,9 @@
 // lien OpenStreetMap : https://wiki.openstreetmap.org/wiki/OpenLayers_Simple_Example
 // lien mapQuest : https://developer.mapquest.com/documentation/directions-api/
 // 
+let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+let toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+
 let map = new OpenLayers.Map("demoMap");
 map.addLayer(new OpenLayers.Layer.OSM());
 map.zoomToMaxExtent();
@@ -21,21 +24,32 @@ function callOCM(contryCode, nbPoints = 100){
 }
 
 
-
-//TODO supprimer
-// function placerChargeurs(chargeursList){
-// 	console.log(chargeursList);
-// 	chargeursList.forEach( function(element, index) {
-// 		markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude);
-// 	});
-// }
-
 callOCM('FR',9000).then(function(chargeursList){
 	console.log(chargeursList);
 	chargeursList.forEach( function(element, index) {
 		markChargers(element.AddressInfo.Longitude, element.AddressInfo.Latitude);
 	});
 });
+
+function centerMapOnLocation(longitude, latitude){
+	var position = new OpenLayers.LonLat(longitude,latitude).transform( fromProjection, toProjection);
+	var zoom = 15;
+	map.setCenter(position, zoom);
+}
+
+function centerOnLocation(){
+	console.log("Tanguy");
+	if(navigator.geolocation) {
+	    // Le navigateur supporte la géolocalisation
+	    navigator.geolocation.getCurrentPosition(function(geolocPosition) {
+	    centerMapOnLocation(geolocPosition.coords.longitude, geolocPosition.coords.latitude);});
+	} else {
+	    // La géolocalisation est pas supportée
+	}
+}
+
+
+
 
 // let myPromise = new Promise(function(myResolve, myReject) {
 //   setTimeout(function() { myResolve("I love You !!"); }, 3000);
@@ -85,12 +99,6 @@ function traceRoute(id){
 
 
 function markChargers(longitude, latitude){
-	var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
-	var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
 	var position       = new OpenLayers.LonLat(longitude, latitude).transform( fromProjection, toProjection);
-
-
-
 	markers.addMarker(new OpenLayers.Marker(position));
-
 }
